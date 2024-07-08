@@ -2,6 +2,7 @@ const express = require("express");
 const ytdl = require("ytdl-core");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 
 dotenv.config();
 const app = express();
@@ -16,6 +17,15 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+});
+
+app.use(limiter);
+
 app.get("/download", async (req, res) => {
   try {
     const url = req.query.url;
@@ -27,7 +37,7 @@ app.get("/download", async (req, res) => {
     };
     return res.send(data);
   } catch (error) {
-    return res.status(500);
+    return res.status(500).send({ error: "Failed to fetch video info" });
   }
 });
 
