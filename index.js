@@ -1,5 +1,6 @@
 const express = require("express");
 const ytdl = require("ytdl-core");
+const instagramDl = require("@sasmeee/igdl");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
@@ -26,7 +27,7 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.get("/download", async (req, res) => {
+app.get("/yt/download", async (req, res) => {
   try {
     const url = req.query.url;
     const videoId = await ytdl.getURLVideoID(url);
@@ -35,6 +36,16 @@ app.get("/download", async (req, res) => {
       url: "https://www.youtube.com/embed/" + videoId,
       info: metaInfo.formats,
     };
+    return res.send(data);
+  } catch (error) {
+    return res.status(500).send({ error: "Failed to fetch video info" });
+  }
+});
+
+app.get("/instareel/download", async (req, res) => {
+  try {
+    const url = req.query.url;
+    const data = await instagramDl(url);
     return res.send(data);
   } catch (error) {
     return res.status(500).send({ error: "Failed to fetch video info" });
